@@ -121,8 +121,21 @@ public class MainApp extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void get_from_apiActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_get_from_apiActionPerformed
-        //api_manger api;
-        
+        getAPI();
+    }//GEN-LAST:event_get_from_apiActionPerformed
+
+    private void save_to_databaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_save_to_databaseActionPerformed
+        SaveDB();
+    }//GEN-LAST:event_save_to_databaseActionPerformed
+
+    private void get_from_databaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_get_from_databaseActionPerformed
+        getDB();
+    }//GEN-LAST:event_get_from_databaseActionPerformed
+
+    
+    
+    public void getAPI()
+    {
         long start = System.nanoTime();
         
         ArrayList<String> urls = new ArrayList<>();
@@ -131,7 +144,7 @@ public class MainApp extends javax.swing.JFrame {
         urls.add("http://newsapi.org/v2/top-headlines?sources=techcrunch&apiKey=de0418c6a6c54dde85c9e12b9a7bdf1e");
         
         jTextArea1.setText("");
-        //String result = "";
+        
         
         
         
@@ -145,8 +158,9 @@ public class MainApp extends javax.swing.JFrame {
                 try {
                     api_manger api = new api_manger(new URL(urls.get(0)));
                     
-                    //results.add(api.display_json() + "**********************************************\n");
-                    jTextArea1.setText(jTextArea1.getText() + api.display_json() + "**********************************************\n");
+                    
+                    String result = api.display_json() + "**********************************************\n";
+                    jTextArea1.setText(jTextArea1.getText() + result);
                     latch1.countDown();
                 } catch (MalformedURLException ex) {
                     Logger.getLogger(MainApp.class.getName()).log(Level.SEVERE, null, ex);
@@ -158,12 +172,12 @@ public class MainApp extends javax.swing.JFrame {
             public void run(){
                 try {
                     api_manger api = new api_manger(new URL(urls.get(1)));
-                    
+                    String result = api.display_json() + "**********************************************\n";
                     
                     latch1.await();
-                    //
-                    //results.add(api.display_json() + "**********************************************\n");
-                    jTextArea1.setText(jTextArea1.getText() + api.display_json() + "**********************************************\n");
+                    
+                    
+                    jTextArea1.setText(jTextArea1.getText() + result);
                     latch2.countDown();
                 } catch (MalformedURLException ex) {
                     Logger.getLogger(MainApp.class.getName()).log(Level.SEVERE, null, ex);
@@ -177,9 +191,12 @@ public class MainApp extends javax.swing.JFrame {
             public void run(){
                 try {
                     api_manger api = new api_manger(new URL(urls.get(2)));
+                    String result = api.display_json() + "**********************************************\n";
+                    
                     latch2.await();
-                    //results.add(api.display_json() + "**********************************************\n");
-                    jTextArea1.setText(jTextArea1.getText() + api.display_json() + "**********************************************\n");
+                    
+                    
+                    jTextArea1.setText(jTextArea1.getText() + result);
                     latch3.countDown();
                 } catch (MalformedURLException ex) {
                     Logger.getLogger(MainApp.class.getName()).log(Level.SEVERE, null, ex);
@@ -200,24 +217,11 @@ public class MainApp extends javax.swing.JFrame {
                 }
             }
         }).start();
-        
-        
-        
-        /*try {
-            for (String url : urls) {
-                
-                api = new api_manger(new URL(url));
-                result += api.display_json() + "**********************************************\n";
-                
-            }
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(MainApp.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        jTextArea1.setText(result);*/
-
-    }//GEN-LAST:event_get_from_apiActionPerformed
-
-    private void save_to_databaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_save_to_databaseActionPerformed
+    }
+    
+    
+    public void SaveDB ()
+    {
         long start = System.nanoTime();
         
         data_manger dm = new data_manger();
@@ -311,25 +315,38 @@ public class MainApp extends javax.swing.JFrame {
                 }
             }
         }).start();
+    }
+    
+    
+    public void getDB ()
+    {
         
-        
-        
-    }//GEN-LAST:event_save_to_databaseActionPerformed
+            
+            new Thread(new Runnable(){
+            public void run(){
+                try {
+                jTextArea1.setText("");
+                String result = "";
+                data_manger dm = new data_manger();
+                ResultSet rs = dm.display();
+                while (rs.next()) {
+                    result = rs.getString("title") + "\n\n" + rs.getString("content") + "\n----------------------------------------------\n";
+                    jTextArea1.setText(jTextArea1.getText() + result);
+                }
+                 
 
-    private void get_from_databaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_get_from_databaseActionPerformed
-        try {
-            String result = "";
-            data_manger dm = new data_manger();
-            ResultSet rs = dm.display();
-            while (rs.next()) {
-                result += rs.getString("title") + "\n\n" + rs.getString("content") + "\n----------------------------------------------\n";
+                 } catch (SQLException | ClassNotFoundException ex) {
+                    Logger.getLogger(MainApp.class.getName()).log(Level.SEVERE, null, ex);
+                }   
             }
-            jTextArea1.setText(result);
-        } catch (SQLException | ClassNotFoundException ex) {
-            Logger.getLogger(MainApp.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }//GEN-LAST:event_get_from_databaseActionPerformed
-
+        }).start();
+            
+            
+            
+        
+    }
+    
+    
     /**
      * @param args the command line arguments
      */
